@@ -14,6 +14,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
 
     @IBOutlet var sceneView: ARSCNView!
     
+    var hoopAdded = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -31,12 +33,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
     
     @IBAction func screenTapped(_ sender: UITapGestureRecognizer) {
-        let touchLocation = sender.location(in: sceneView)
-        
-        let hitTestResult = sceneView.hitTest(touchLocation, types: [.existingPlaneUsingExtent])
-        
-        if let result = hitTestResult.first {
-            addHoop(result: result)
+        if !hoopAdded {
+            let touchLocation = sender.location(in: sceneView)
+            
+            let hitTestResult = sceneView.hitTest(touchLocation, types: [.existingPlaneUsingExtent])
+            
+            if let result = hitTestResult.first {
+                addHoop(result: result)
+                hoopAdded = true
+            }
+        } else {
+            createBasketball()
         }
     }
     
@@ -67,6 +74,16 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         
         return node
+    }
+    
+    func createBasketball() {
+        guard let frame = sceneView.session.currentFrame else { return } //позиция камеры
+        
+        let ball = SCNNode(geometry: SCNSphere(radius: 0.25))
+        ball.geometry?.firstMaterial?.diffuse.contents = UIColor.orange
+        
+        ball.transform = SCNMatrix4(frame.camera.transform)
+        sceneView.scene.rootNode.addChildNode(ball)
     }
     
     override func viewWillAppear(_ animated: Bool) {

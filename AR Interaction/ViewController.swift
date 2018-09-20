@@ -55,7 +55,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let position = result.worldTransform.columns.3
         hoopNode.position = SCNVector3(position.x, position.y, position.z)
         
-        hoopNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(node: hoopNode, options: [SCNPhysicsShape.Option.type:SCNPhysicsShape.ShapeType.concavePolyhedron]))
+        hoopNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(node: hoopNode, options: [SCNPhysicsShape.Option.type : SCNPhysicsShape.ShapeType.concavePolyhedron]))
         
         sceneView.scene.rootNode.addChildNode(hoopNode)
     }
@@ -84,7 +84,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let ball = SCNNode(geometry: SCNSphere(radius: 0.25))
         ball.geometry?.firstMaterial?.diffuse.contents = UIColor.orange
         
-        let physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(node: ball))
+        let physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(node: ball, options: [SCNPhysicsShape.Option.collisionMargin : 0.01]))
         ball.physicsBody = physicsBody
         
         let transform = SCNMatrix4(frame.camera.transform)

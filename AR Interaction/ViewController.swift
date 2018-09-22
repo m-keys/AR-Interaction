@@ -82,7 +82,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         guard let frame = sceneView.session.currentFrame else { return } //позиция камеры
         
         let ball = SCNNode(geometry: SCNSphere(radius: 0.25))
-        ball.geometry?.firstMaterial?.diffuse.contents = UIColor.orange
+        ball.geometry?.firstMaterial?.diffuse.contents = UIImage(named: "basketball-147794_960_720")
         
         let physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(node: ball, options: [SCNPhysicsShape.Option.collisionMargin : 0.01]))
         ball.physicsBody = physicsBody

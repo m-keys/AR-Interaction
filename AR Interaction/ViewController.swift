@@ -16,6 +16,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     var hoopAdded = false
     
+    var balls = [SCNNode]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -52,12 +54,25 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         guard let hoopNode = hoopScene?.rootNode.childNode(withName: "Hoop", recursively: false) else { return }
         
-        let position = result.worldTransform.columns.3
-        hoopNode.position = SCNVector3(position.x, position.y, position.z)
+        //let position = result.worldTransform.columns.3
+        //hoopNode.position = SCNVector3(position.x, position.y, position.z)
+        
+        hoopNode.simdTransform = result.worldTransform
+        hoopNode.eulerAngles.x -= .pi / 2
         
         hoopNode.physicsBody = SCNPhysicsBody(type: .static, shape: SCNPhysicsShape(node: hoopNode, options: [SCNPhysicsShape.Option.type : SCNPhysicsShape.ShapeType.concavePolyhedron]))
         
         sceneView.scene.rootNode.addChildNode(hoopNode)
+        
+        if let wall = sceneView.scene.rootNode.childNode(withName: "wall", recursively: true) {
+            wall.removeFromParentNode()
+            print("Wall remove")
+            //if let wallAnchor = sceneView.anchor(for: wall) {
+                //sceneView.session.remove(anchor: wallAnchor)
+                //print("Anchor remove")
+            //}
+        }
+        
     }
     
     func createWall(planeAnchor: ARPlaneAnchor) -> SCNNode {
@@ -69,11 +84,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         let node = SCNNode()
         node.geometry = geometry
+        node.name = "wall"
         
         node.eulerAngles.x = -Float.pi / 2
         node.opacity = 0.25
-        
-        
         
         return node
     }
@@ -82,7 +96,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         guard let frame = sceneView.session.currentFrame else { return } //позиция камеры
         
         let ball = SCNNode(geometry: SCNSphere(radius: 0.25))
-        ball.geometry?.firstMaterial?.diffuse.contents = UIImage(named: "basketball-147794_960_720")
+        ball.geometry?.firstMaterial?.diffuse.contents = UIImage(named: "ball")
+        ball.name = "ball"
         
         let physicsBody = SCNPhysicsBody(type: .dynamic, shape: SCNPhysicsShape(node: ball, options: [SCNPhysicsShape.Option.collisionMargin : 0.01]))
         ball.physicsBody = physicsBody
@@ -95,7 +110,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         ball.physicsBody?.applyForce(force, asImpulse: true)
         
+        // ---ball.transform = transform
+        
         sceneView.scene.rootNode.addChildNode(ball)
+        
+        balls.append(ball)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -148,6 +167,15 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         floor.position = SCNVector3(planeAnchor.center.x, 0, planeAnchor.center.z)
         
+    }
+    
+    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
+        for (index, ball) in balls.enumerated() {
+            if ball.presentation.position.y < -2 {
+                ball.removeFromParentNode()
+                balls.remove(at: index)
+            }
+        }
     }
     
     func session(_ session: ARSession, didFailWithError error: Error) {
